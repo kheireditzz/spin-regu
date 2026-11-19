@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Spin Wheel · Ronde 1 & Ronde 2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       THEME WHITE · ULTRA CLEAN & MODERN MINIMALIST (ZERO EMOJI)
+       ========================================================================== */
+    :root {
+      --bg-page: #F8FAFC;
+      --bg-card: #FFFFFF;
+      --bg-card-subtle: #F1F5F9;
+      --border: #E2E8F0;
+      --border-focus: #CBD5E1;
+      
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --text-subtle: #94A3B8;
+
+      --primary: #4F46E5;
+      --primary-hover: #4338CA;
+      --primary-light: #EEF2FF;
+      --primary-ring: rgba(79, 70, 229, 0.15);
+
+      --success: #10B981;
+      --success-light: #ECFDF5;
+      --danger: #EF4444;
+      --danger-light: #FEF2F2;
+
+      --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+      --shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
+      --shadow-xl: 0 20px 30px -10px rgba(15, 23, 42, 0.1);
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 16px 40px;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(224, 231, 255, 0.45) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(241, 245, 249, 0.8) 0%, transparent 50%);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .brand-subtitle {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      background: #E2E8F0;
+      color: var(--text-main);
+    }
+
+    .icon-btn.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: rgba(79, 70, 229, 0.25);
+    }
+
+    /* ROUND SELECTOR SWITCH */
+    .round-switch-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 8px;
+      display: flex;
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .round-tab-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .round-tab-btn.active {
+      background: var(--bg-page);
+      border-color: var(--border);
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .round-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: var(--bg-card-subtle);
+      color: var(--text-muted);
+    }
+
+    .round-tab-btn.active .round-badge {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* WHEEL MAIN STAGE */
+    .wheel-card {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px 16px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: var(--shadow-md);
+    }
+
+    .wheel-header-info {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+
+    .active-round-label {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-ring);
+    }
+
+    .regu-count-badge {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .wheel-wrapper {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      margin: 8px auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @media (max-width: 380px) {
+      .wheel-wrapper {
+        width: 280px;
+        height: 280px;
+      }
+    }
+
+    /* Pointer / Needle */
+    .wheel-pointer {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+      pointer-events: none;
+      transition: transform 0.1s ease;
+    }
+
+    .wheel-pointer svg {
+      display: block;
+      width: 32px;
+      height: 36px;
+    }
+
+    /* Canvas */
+    canvas#wheelCanvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.08), inset 0 0 0 8px #FFFFFF;
+      transition: filter 0.2s ease;
+    }
+
+    /* Center Spin Hub */
+    .wheel-center-hub {
+      position: absolute;
+      width: 78px;
+      height: 78px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 3px solid var(--border);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.1), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      user-select: none;
+      transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.15s ease;
+    }
+
+    .wheel-center-hub:hover {
+      transform: scale(1.05);
+      border-color: var(--primary);
+    }
+
+    .wheel-center-hub:active {
+      transform: scale(0.95);
+    }
+
+    .hub-label {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 0.04em;
+    }
+
+    .hub-icon {
+      color: var(--primary);
+      margin-top: 1px;
+    }
+
+    /* Big Action Button */
+    .btn-spin-action {
+      width: 100%;
+      padding: 14px 20px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-md);
+      color: #FFFFFF;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 6px 16px -2px rgba(79, 70, 229, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .btn-spin-action:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px -2px rgba(79, 70, 229, 0.45);
+    }
+
+    .btn-spin-action:active {
+      transform: translateY(1px);
+    }
+
+    .btn-spin-action:disabled {
+      background: #CBD5E1;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* TEAMS & OPTIONS PANEL */
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .panel-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title svg {
+      color: var(--text-muted);
+    }
+
+    /* Teams list */
+    .team-chips-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .team-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      transition: all 0.2s ease;
+    }
+
+    .team-chip-color {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .team-chip.disabled {
+      opacity: 0.45;
+      text-decoration: line-through;
+      background: #F8FAFC;
+    }
+
+    .btn-chip-action {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+      border-radius: 4px;
+    }
+
+    .btn-chip-action:hover {
+      color: var(--danger);
+      background: var(--danger-light);
+    }
+
+    /* TOGGLE SWITCH OPTION */
+    .option-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-top: 1px solid var(--border);
+      margin-top: 12px;
+    }
+
+    .option-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .option-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .option-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* Modern Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #E2E8F0;
+      transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: var(--radius-full);
+    }
+
+    .slider::before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+
+    input:checked + .slider::before {
+      transform: translateX(20px);
+    }
+
+    /* HISTORY / LOG */
+    .history-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: var(--bg-card-subtle);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+    }
+
+    .history-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .history-round-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .history-name {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
+    .history-time {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .history-empty {
+      text-align: center;
+      padding: 24px 12px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* WINNER MODAL DIALOG */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: #FFFFFF;
+      width: 100%;
+      max-width: 400px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 28px 24px 24px;
+      text-align: center;
+      box-shadow: var(--shadow-xl);
+      transform: scale(0.92);
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .modal-overlay.open .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-trophy-badge {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      border: 3px solid #FFFFFF;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.2);
+    }
+
+    .modal-round-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .modal-winner-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      line-height: 1.1;
+    }
+
+    .modal-winner-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-modal-close {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-modal-close:hover {
+      background: #E2E8F0;
+    }
+
+    .btn-modal-primary {
+      flex: 1;
+      padding: 12px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #FFFFFF;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      transition: background 0.2s;
+    }
+
+    .btn-modal-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding-top: 10px;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- APP HEADER -->
+    <header>
+      <div class="brand">
+        <div class="brand-icon">
+          <!-- Vector Wheel Icon (Zero Emoji) -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="m4.93 4.93 4.24 4.24"></path>
+            <path d="m14.83 9.17 4.24-4.24"></path>
+            <path d="m14.83 14.83 4.24 4.24"></path>
+            <path d="m9.17 14.83-4.24 4.24"></path>
+            <circle cx="12" cy="12" r="2"></circle>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">SPIN REGU</div>
+          <div class="brand-subtitle">Ronde 1 & Ronde 2 · Tema White</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Sound Toggle -->
+        <button id="soundToggleBtn" class="icon-btn active" title="Toggle Suara" aria-label="Toggle Suara">
+          <svg id="soundIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+        </button>
+        <!-- Reset Round -->
+        <button id="resetRoundBtn" class="icon-btn" title="Reset Peserta Ronde Ini" aria-label="Reset Peserta">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ROUND SWITCHER TABS -->
+    <div class="round-switch-card">
+      <button class="round-tab-btn active" id="tabRonde1" data-round="1">
+        <span>Ronde 1</span>
+        <span class="round-badge" id="badgeCount1">3 Regu</span>
+      </button>
+      <button class="round-tab-btn" id="tabRonde2" data-round="2">
+        <span>Ronde 2</span>
+        <span class="round-badge" id="badgeCount2">3 Regu</span>
+      </button>
+    </div>
+
+    <!-- MAIN WHEEL STAGE -->
+    <div class="wheel-card">
+      <div class="wheel-header-info">
+        <div class="active-round-label">
+          <span class="status-dot"></span>
+          <span id="labelCurrentRound">RONDE 1</span>
+        </div>
+        <div class="regu-count-badge" id="labelActiveCount">3 Regu Aktif</div>
+      </div>
+
+      <div class="wheel-wrapper">
+        <!-- Pointer Needle (Zero Emoji) -->
+        <div class="wheel-pointer" id="wheelPointer">
+          <svg viewBox="0 0 32 38" fill="none">
+            <path d="M16 38L6 8C5 4.5 7.5 1 11.5 1H20.5C24.5 1 27 4.5 26 8L16 38Z" fill="#0F172A"/>
+            <path d="M16 34L8 8C7.5 5.5 9 3 11.5 3H20.5C23 3 24.5 5.5 24 8L16 34Z" fill="#4F46E5"/>
+            <circle cx="16" cy="11" r="3" fill="#FFFFFF"/>
+          </svg>
+        </div>
+
+        <!-- Wheel Canvas -->
+        <canvas id="wheelCanvas" width="640" height="640"></canvas>
+
+        <!-- Center Spin Button Hub -->
+        <div class="wheel-center-hub" id="centerSpinHub" title="Klik untuk memutar">
+          <svg class="hub-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span class="hub-label">PUTAR</span>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <button class="btn-spin-action" id="spinActionBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+        </svg>
+        <span>PUTAR RODA SEKARANG</span>
+      </button>
+    </div>
+
+    <!-- TEAMS LIST & CONTROLS -->
+    <div class="panel-card">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span id="panelTeamsTitle">Daftar Regu (Ronde 1)</span>
+        </div>
+        <button id="resetAllTeamsBtn" class="icon-btn" style="width: 28px; height: 28px;" title="Kembalikan semua regu">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="team-chips-list" id="teamChipsContainer">
+        <!-- Injected via JS -->
+      </div>
+
+      <div class="option-row">
+        <div class="option-info">
+          <div class="option-label">Otomatis Eliminasi Pemenang</div>
+          <div class="option-desc">Keluarkan regu yang terpilih dari putaran berikutnya</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="eliminateToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- HISTORY LOG -->
+    <div class="history-card">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Riwayat Pemenang</span>
+        </div>
+        <button id="clearHistoryBtn" class="icon-btn" style="width: 28px; height: 28px;" title="Bersihkan riwayat">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="history-list" id="historyList">
+        <div class="history-empty">Belum ada putaran pemenang.</div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      SPIN REGU · White Minimalist Edition · Sistem Undian Adil & Cepat
+    </footer>
+  </div>
+
+  <!-- WINNER MODAL -->
+  <div class="modal-overlay" id="winnerModal">
+    <div class="modal-content">
+      <div class="modal-trophy-badge">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+          <path d="M4 22h16"></path>
+          <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+          <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+          <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+        </svg>
+      </div>
+      <div class="modal-round-title" id="modalRoundTitle">HASIL RONDE 1</div>
+      <div class="modal-winner-name" id="modalWinnerName">REGU A</div>
+      <div class="modal-winner-desc" id="modalWinnerDesc">Terpilih pada undian putaran roda ini!</div>
+      <div class="modal-actions">
+        <button class="btn-modal-close" id="modalCloseBtn">Tutup</button>
+        <button class="btn-modal-primary" id="modalContinueBtn">Lanjut Putar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP LOGIC & AUDIO SYNTHESIZER -->
+  <script>
+    /* ==========================================================================
+       DATA & STATE MANAGEMENT
+       ========================================================================== */
+    const STATE = {
+      currentRound: 1, // 1 or 2
+      rounds: {
+        1: [
+          { id: '1-a', name: 'Regu A', color: '#4F46E5', bg: '#EEF2FF', text: '#312E81', active: true },
+          { id: '1-b', name: 'Regu B', color: '#0D9488', bg: '#F0FDFA', text: '#134E4A', active: true },
+          { id: '1-c', name: 'Regu C', color: '#E11D48', bg: '#FFF1F2', text: '#881337', active: true },
+        ],
+        2: [
+          { id: '2-a', name: 'Regu A', color: '#4F46E5', bg: '#EEF2FF', text: '#312E81', active: true },
+          { id: '2-b', name: 'Regu B', color: '#0D9488', bg: '#F0FDFA', text: '#134E4A', active: true },
+          { id: '2-c', name: 'Regu C', color: '#E11D48', bg: '#FFF1F2', text: '#881337', active: true },
+        ]
+      },
+      isSpinning: false,
+      currentAngle: 0,
+      soundEnabled: true,
+      autoEliminate: false,
+      history: []
+    };
+
+    /* ==========================================================================
+       SYNTHETIC AUDIO (Web Audio API - Zero External Assets)
+       ========================================================================== */
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTick() {
+        if (!STATE.soundEnabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(680, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.04);
+
+          gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.04);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.04);
+        } catch (e) {
+          console.warn('Audio tick error:', e);
+        }
+      }
+
+      playVictory() {
+        if (!STATE.soundEnabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        try {
+          const chords = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+          chords.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.08);
+
+            gain.gain.setValueAtTime(0.15, this.ctx.currentTime + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.45);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(this.ctx.currentTime + idx * 0.08);
+            osc.stop(this.ctx.currentTime + idx * 0.08 + 0.5);
+          });
+        } catch (e) {
+          console.warn('Victory chime error:', e);
+        }
+      }
+    }
+
+    const audio = new SoundEngine();
+
+    /* ==========================================================================
+       CANVAS WHEEL RENDERING
+       ========================================================================== */
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    let lastTickIndex = -1;
+
+    function getActiveItems() {
+      return STATE.rounds[STATE.currentRound].filter(item => item.active);
+    }
+
+    function drawWheel() {
+      const items = getActiveItems();
+      const dpr = window.devicePixelRatio || 2;
+      const size = 640;
+      
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const cx = size / 2;
+      const cy = size / 2;
+      const radius = (size / 2) - 16;
+
+      ctx.clearRect(0, 0, size, size);
+
+      if (items.length === 0) {
+        // Empty state wheel
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#F1F5F9';
+        ctx.fill();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#E2E8F0';
+        ctx.stroke();
+
+        ctx.font = "bold 20px 'Outfit', sans-serif";
+        ctx.fillStyle = "#94A3B8";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Semua regu tereliminasi", cx, cy);
+        return;
+      }
+
+      const arc = (Math.PI * 2) / items.length;
+
+      // Outer ring border
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(STATE.currentAngle);
+
+      items.forEach((item, i) => {
+        const startAngle = i * arc;
+        const endAngle = startAngle + arc;
+
+        // Draw Wedge
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, radius, startAngle, endAngle);
+        ctx.closePath();
+
+        // Wedge background with crisp white theme colors
+        ctx.fillStyle = item.bg;
+        ctx.fill();
+
+        // Wedge Border
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.stroke();
+
+        // Draw Accent Arc Rim
+        ctx.beginPath();
+        ctx.arc(0, 0, radius - 2, startAngle, endAngle);
+        ctx.lineWidth = 8;
+        ctx.strokeStyle = item.color;
+        ctx.stroke();
+
+        // Draw Text Label
+        ctx.save();
+        ctx.rotate(startAngle + arc / 2);
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+
+        // Outer glow/shadow for text
+        ctx.font = "bold 28px 'Outfit', sans-serif";
+        ctx.fillStyle = item.text;
+        ctx.fillText(item.name, radius - 36, 0);
+
+        // Small decorative segment indicator dot
+        ctx.beginPath();
+        ctx.arc(radius - 16, 0, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fill();
+
+        ctx.restore();
+      });
+
+      // Outer circle border
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, 0, Math.PI * 2);
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.stroke();
+
+      ctx.restore();
+
+      // Outer subtle shadow ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius + 2, 0, Math.PI * 2);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#E2E8F0';
+      ctx.stroke();
+    }
+
+    /* ==========================================================================
+       SPIN PHYSICS & ANIMATION
+       ========================================================================== */
+    function spinWheel() {
+      if (STATE.isSpinning) return;
+      const items = getActiveItems();
+      if (items.length === 0) {
+        alert('Semua regu telah tereliminasi. Silakan reset regu terlebih dahulu.');
+        return;
+      }
+
+      audio.init();
+      STATE.isSpinning = true;
+      document.getElementById('spinActionBtn').disabled = true;
+      document.getElementById('centerSpinHub').style.pointerEvents = 'none';
+
+      // Pick winner randomly
+      const winnerIndex = Math.floor(Math.random() * items.length);
+      const arc = (Math.PI * 2) / items.length;
+
+      // Pointer is at the TOP (angle = 3 * Math.PI / 2 or -Math.PI / 2)
+      // We want segment `winnerIndex` to land at the top pointer!
+      // In canvas: Top position corresponds to -Math.PI / 2
+      const targetSegmentAngle = winnerIndex * arc + arc / 2;
+      const pointerAngle = (3 * Math.PI) / 2;
+
+      // Total rotations (5 to 8 full revolutions)
+      const minRotations = 6;
+      const extraRotations = Math.floor(Math.random() * 3);
+      const totalRotations = (minRotations + extraRotations) * Math.PI * 2;
+
+      // Calculate final target angle
+      const currentMod = STATE.currentAngle % (Math.PI * 2);
+      let targetAngle = STATE.currentAngle + (totalRotations - currentMod) + (pointerAngle - targetSegmentAngle);
+      
+      // Ensure targetAngle is always ahead of currentAngle
+      while (targetAngle < STATE.currentAngle + totalRotations) {
+        targetAngle += Math.PI * 2;
+      }
+
+      const startAngle = STATE.currentAngle;
+      const deltaAngle = targetAngle - startAngle;
+      const duration = 4600; // 4.6 seconds
+      const startTime = performance.now();
+
+      const pointerEl = document.getElementById('wheelPointer');
+
+      function cubicEaseOut(t) {
+        return 1 - Math.pow(1 - t, 4);
+      }
+
+      function animate(time) {
+        const elapsed = time - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = cubicEaseOut(progress);
+
+        STATE.currentAngle = startAngle + deltaAngle * ease;
+        drawWheel();
+
+        // Calculate tick sound based on which segment crosses pointer
+        const items = getActiveItems();
+        if (items.length > 0) {
+          const currentArc = (Math.PI * 2) / items.length;
+          // Normalised angle at pointer
+          const pointerCurrentAngle = ((3 * Math.PI / 2) - STATE.currentAngle) % (Math.PI * 2);
+          const positiveAngle = (pointerCurrentAngle + Math.PI * 2) % (Math.PI * 2);
+          const currentSegment = Math.floor(positiveAngle / currentArc);
+
+          if (currentSegment !== lastTickIndex) {
+            audio.playTick();
+            lastTickIndex = currentSegment;
+
+            // Pointer bump animation
+            pointerEl.style.transform = 'translateX(-50%) rotate(-12deg)';
+            setTimeout(() => {
+              pointerEl.style.transform = 'translateX(-50%) rotate(0deg)';
+            }, 50);
+          }
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          // Completed
+          STATE.isSpinning = false;
+          document.getElementById('spinActionBtn').disabled = false;
+          document.getElementById('centerSpinHub').style.pointerEvents = 'auto';
+
+          const winningItem = items[winnerIndex];
+          onSpinCompleted(winningItem);
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    /* ==========================================================================
+       SPIN RESULT & MODAL
+       ========================================================================== */
+    function onSpinCompleted(winner) {
+      audio.playVictory();
+
+      // Launch Confetti Burst
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#4F46E5', '#10B981', '#F59E0B', '#E11D48', '#0EA5E9']
+        });
+      }
+
+      // Add to History
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      
+      STATE.history.unshift({
+        round: STATE.currentRound,
+        winner: winner.name,
+        color: winner.color,
+        time: timeStr
+      });
+      renderHistory();
+
+      // Show Winner Modal
+      const modal = document.getElementById('winnerModal');
+      document.getElementById('modalRoundTitle').textContent = `HASIL UNDIAN RONDE ${STATE.currentRound}`;
+      document.getElementById('modalWinnerName').textContent = winner.name;
+      document.getElementById('modalWinnerName').style.color = winner.color;
+      document.getElementById('modalWinnerDesc').textContent = `Selamat kepada ${winner.name} yang terpilih di Ronde ${STATE.currentRound}!`;
+      modal.classList.add('open');
+
+      // Auto Eliminate if enabled
+      if (STATE.autoEliminate) {
+        winner.active = false;
+        renderTeams();
+        drawWheel();
+      }
+    }
+
+    /* ==========================================================================
+       UI RENDERING & EVENT HANDLERS
+       ========================================================================== */
+    function switchRound(roundNumber) {
+      if (STATE.isSpinning) return;
+      STATE.currentRound = roundNumber;
+
+      // Update tabs
+      document.getElementById('tabRonde1').classList.toggle('active', roundNumber === 1);
+      document.getElementById('tabRonde2').classList.toggle('active', roundNumber === 2);
+
+      // Update header labels
+      document.getElementById('labelCurrentRound').textContent = `RONDE ${roundNumber}`;
+      document.getElementById('panelTeamsTitle').textContent = `Daftar Regu (Ronde ${roundNumber})`;
+
+      renderTeams();
+      drawWheel();
+    }
+
+    function renderTeams() {
+      const container = document.getElementById('teamChipsContainer');
+      const items = STATE.rounds[STATE.currentRound];
+      const activeCount = items.filter(i => i.active).length;
+
+      // Update badges
+      document.getElementById('badgeCount1').textContent = `${STATE.rounds[1].filter(i => i.active).length} Regu`;
+      document.getElementById('badgeCount2').textContent = `${STATE.rounds[2].filter(i => i.active).length} Regu`;
+      document.getElementById('labelActiveCount').textContent = `${activeCount} Regu Aktif`;
+
+      container.innerHTML = '';
+      items.forEach(item => {
+        const chip = document.createElement('div');
+        chip.className = `team-chip ${item.active ? '' : 'disabled'}`;
+        
+        chip.innerHTML = `
+          <span class="team-chip-color" style="background: ${item.color};"></span>
+          <span>${item.name}</span>
+          <button class="btn-chip-action" title="${item.active ? 'Nonaktifkan' : 'Aktifkan'}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              ${item.active 
+                ? '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>' 
+                : '<polyline points="20 6 9 17 4 12"></polyline>'}
+            </svg>
+          </button>
+        `;
+
+        const actionBtn = chip.querySelector('.btn-chip-action');
+        actionBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (STATE.isSpinning) return;
+          item.active = !item.active;
+          renderTeams();
+          drawWheel();
+        });
+
+        container.appendChild(chip);
+      });
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('historyList');
+      if (STATE.history.length === 0) {
+        container.innerHTML = '<div class="history-empty">Belum ada putaran pemenang.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      STATE.history.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'history-item';
+        el.innerHTML = `
+          <div class="history-meta">
+            <span class="history-round-tag">Ronde ${item.round}</span>
+            <span class="history-name" style="color: ${item.color};">${item.winner}</span>
+          </div>
+          <span class="history-time">${item.time}</span>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    // Attach Listeners
+    document.getElementById('tabRonde1').addEventListener('click', () => switchRound(1));
+    document.getElementById('tabRonde2').addEventListener('click', () => switchRound(2));
+
+    document.getElementById('spinActionBtn').addEventListener('click', spinWheel);
+    document.getElementById('centerSpinHub').addEventListener('click', spinWheel);
+
+    document.getElementById('soundToggleBtn').addEventListener('click', () => {
+      STATE.soundEnabled = !STATE.soundEnabled;
+      const btn = document.getElementById('soundToggleBtn');
+      btn.classList.toggle('active', STATE.soundEnabled);
+    });
+
+    document.getElementById('resetRoundBtn').addEventListener('click', () => {
+      if (STATE.isSpinning) return;
+      STATE.rounds[STATE.currentRound].forEach(item => item.active = true);
+      renderTeams();
+      drawWheel();
+    });
+
+    document.getElementById('resetAllTeamsBtn').addEventListener('click', () => {
+      if (STATE.isSpinning) return;
+      STATE.rounds[1].forEach(item => item.active = true);
+      STATE.rounds[2].forEach(item => item.active = true);
+      renderTeams();
+      drawWheel();
+    });
+
+    document.getElementById('eliminateToggle').addEventListener('change', (e) => {
+      STATE.autoEliminate = e.target.checked;
+    });
+
+    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+      STATE.history = [];
+      renderHistory();
+    });
+
+    // Modal listeners
+    const modal = document.getElementById('winnerModal');
+    document.getElementById('modalCloseBtn').addEventListener('click', () => {
+      modal.classList.remove('open');
+    });
+    document.getElementById('modalContinueBtn').addEventListener('click', () => {
+      modal.classList.remove('open');
+      setTimeout(spinWheel, 300);
+    });
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('open');
+      }
+    });
+
+    // Keyboard support (Spacebar to spin)
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !STATE.isSpinning && !modal.classList.contains('open')) {
+        e.preventDefault();
+        spinWheel();
+      }
+    });
+
+    // Initial render
+    renderTeams();
+    drawWheel();
+  </script>
+</body>
+</html>
